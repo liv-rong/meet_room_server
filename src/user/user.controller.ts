@@ -19,7 +19,7 @@ export class UserController {
   @Post('register')
   register(@Body() registerUser: RegisterUserDto) {
     console.log(registerUser)
-    return 'success'
+    return 'success1111'
   }
 
   @Post()
