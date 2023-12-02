@@ -5,7 +5,7 @@ node_modules
 dist
 build
 .env*
-.env.example
+!.env.example
 stats.html
 
 # Logs
@@ -23,8 +23,8 @@ coverage
 
 # Editor
 .vscode/*
-.vscode/extensions.json
-.vscode/*.code-snippets
+!.vscode/extensions.json
+!.vscode/*.code-snippets
 .idea
 *.suo
 *.ntvs*
