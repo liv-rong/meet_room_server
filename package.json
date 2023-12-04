@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
+    "@nestjs/config": "^3.1.1",
     "@nestjs/core": "^10.0.0",
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/mapped-types": "*",
@@ -30,6 +31,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "mysql2": "^3.6.5",
+    "nodemailer": "^6.9.7",
     "redis": "^4.6.11",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
