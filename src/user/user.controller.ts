@@ -8,7 +8,10 @@ import {
   Delete,
   Inject,
   Query,
-  UnauthorizedException
+  UnauthorizedException,
+  ParseIntPipe,
+  BadRequestException,
+  DefaultValuePipe
 } from '@nestjs/common'
 import { UserService } from './user.service'
 import { CreateUserDto } from './dto/create-user.dto'
@@ -19,6 +22,10 @@ import { RedisService } from 'src/redis/redis.service'
 import { LoginUserDto } from './dto/login-user.dto'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
+import { RequireLogin, UserInfo } from 'src/custom.decorator'
+import { UserDetailVo } from './vo/user-info.vo'
+import { UpdateUserPasswordDto } from './dto/update-user-password.dto'
+import { generateParseIntPipe } from 'src/utils'
 
 @Controller('user')
 export class UserController {
@@ -193,5 +200,112 @@ export class UserController {
     } catch (e) {
       throw new UnauthorizedException('token 已失效，请重新登录')
     }
+  }
+
+  @Get('info')
+  @RequireLogin()
+  async info(@UserInfo('userId') userId: number) {
+    const user = await this.userService.findUserDetailById(userId)
+    const vo = new UserDetailVo()
+    vo.id = user.id
+    vo.email = user.email
+    vo.username = user.username
+    vo.headPic = user.headPic
+    vo.phoneNumber = user.phoneNumber
+    vo.nickName = user.nickName
+    vo.createTime = user.createTime
+    vo.isFrozen = user.isFrozen
+    return vo
+  }
+
+  // 更新密码的接口
+  @Post(['update_password', 'admin/update_password'])
+  @RequireLogin()
+  async updatePassword(
+    @UserInfo('userId') userId: number,
+    @Body() passwordDto: UpdateUserPasswordDto
+  ) {
+    console.log(passwordDto)
+    await this.userService.updatePassword(userId, passwordDto)
+  }
+
+  // 发送邮箱验证码的接口
+  @Get('update_password/captcha')
+  async updatePasswordCaptcha(@Query('address') address: string) {
+    const code = Math.random().toString().slice(2, 8)
+
+    await this.redisService.set(
+      `update_password_captcha_${address}`,
+      code,
+      10 * 60 * 60
+    )
+
+    await this.emailService.sendMail({
+      to: address,
+      subject: '更改密码验证码',
+      html: `<p>你的更改密码验证码是 ${code}</p>`
+    })
+    return '发送成功'
+  }
+
+  //修改个人信息接口
+  @Post(['update', 'admin/update'])
+  @RequireLogin()
+  async update(
+    @UserInfo('userId') userId: number,
+    @Body() updateUserDto: UpdateUserDto
+  ) {
+    return await this.userService.update(userId, updateUserDto)
+  }
+
+  //更新验证码
+  @Get('update/captcha')
+  async updateCaptcha(@Query('address') address: string) {
+    const code = Math.random().toString().slice(2, 8)
+
+    await this.redisService.set(
+      `update_user_captcha_${address}`,
+      code,
+      10 * 60 * 60
+    )
+
+    await this.emailService.sendMail({
+      to: address,
+      subject: '更改用户信息验证码',
+      html: `<p>你的验证码是 ${code}</p>`
+    })
+    return '发送成功'
+  }
+
+  //冻结用户
+  @Get('freeze')
+  async freeze(@Query('id') userId: number) {
+    await this.userService.freezeUserById(userId)
+    return 'success'
+  }
+
+  //用户列表接口
+  @Get('list')
+  async list(
+    @Query('pageNo', new DefaultValuePipe(1), generateParseIntPipe('pageNo'))
+    pageNo: number,
+
+    @Query(
+      'pageSize',
+      new DefaultValuePipe(2),
+      generateParseIntPipe('pageSize')
+    )
+    pageSize: number,
+    @Query('username') username: string,
+    @Query('nickName') nickName: string,
+    @Query('email') email: string
+  ) {
+    return await this.userService.findUsers(
+      username,
+      nickName,
+      email,
+      pageNo,
+      pageSize
+    )
   }
 }
