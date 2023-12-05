@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsEmail, IsNotEmpty, MinLength } from 'class-validator'
-export class RegisterUserDto {
+export class SignupDto {
   @IsNotEmpty({
     message: '用户名不能为空'
   })

@@ -34,7 +34,7 @@ export class UserInfo {
   @ApiProperty({ example: 'query_aaa' })
   permissions: string[]
 }
-export class LoginUserVo {
+export class LoginVo {
   @ApiProperty()
   userInfo: UserInfo
 
