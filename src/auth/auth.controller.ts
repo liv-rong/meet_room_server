@@ -18,7 +18,6 @@ import { LoginDto } from './dto/login.dto'
 import { EmailService } from 'src/email/email.service'
 import { RedisService } from 'src/redis/redis.service'
 import { JwtService } from '@nestjs/jwt'
-import { ConfigService } from '@nestjs/config'
 import { RefreshTokenVo } from './vo/refresh-token.vo'
 
 @ApiTags('权限')
@@ -32,9 +31,6 @@ export class AuthController {
 
   @Inject(JwtService)
   private jwtService: JwtService
-
-  @Inject(ConfigService)
-  private configService: ConfigService
 
   constructor(private readonly authService: AuthService) {}
 
@@ -57,28 +53,15 @@ export class AuthController {
   @Post('/login')
   async login(@Body() loginUser: LoginDto) {
     const vo = await this.authService.login(loginUser)
-    vo.accessToken = this.jwtService.sign(
-      {
-        userId: vo.userInfo.id,
-        username: vo.userInfo.username,
-        roles: vo.userInfo.roles,
-        permissions: vo.userInfo.permissions
-      },
-      {
-        expiresIn:
-          this.configService.get('jwt_access_token_expires_time') || '30m'
-      }
-    )
-
-    vo.refreshToken = this.jwtService.sign(
-      {
-        userId: vo.userInfo.id
-      },
-      {
-        expiresIn:
-          this.configService.get('jwt_refresh_token_expres_time') || '7d'
-      }
-    )
+    vo.userInfo
+    vo.accessToken = this.authService.generateAccessToken({
+      id: vo.userInfo.id,
+      username: vo.userInfo.username,
+      roles: vo.userInfo.roles,
+      permissions: vo.userInfo.permissions,
+      isAdmin: vo.userInfo.isAdmin
+    })
+    vo.refreshToken = this.authService.generateRefreshToken(vo.userInfo.id)
     return vo
   }
 
@@ -98,8 +81,9 @@ export class AuthController {
   async captcha(@Query('address') address: string) {
     const code = Math.random().toString().slice(2, 8)
 
-    await this.redisService.set(`captcha_${address}`, code, 5 * 60)
-
+    const a = await this.redisService.set(`captcha_${address}`, code, 5 * 60)
+    console.log(a, 'a')
+    console.log(await this.redisService.get(`captcha_${address}`), 'get')
     await this.emailService.sendMail({
       to: address,
       subject: '注册验证码',
@@ -131,31 +115,17 @@ export class AuthController {
 
       const user = await this.authService.findUserById(data.userId)
 
-      const access_token = this.jwtService.sign(
-        {
-          userId: user.id,
-          username: user.username,
-          roles: user.roles,
-          permissions: user.permissions
-        },
-        {
-          expiresIn:
-            this.configService.get('jwt_access_token_expires_time') || '30m'
-        }
-      )
-
-      const refresh_token = this.jwtService.sign(
-        {
-          userId: user.id
-        },
-        {
-          expiresIn:
-            this.configService.get('jwt_refresh_token_expres_time') || '7d'
-        }
-      )
       const vo = new RefreshTokenVo()
-      vo.access_token = access_token
-      vo.refresh_token = refresh_token
+
+      vo.access_token = this.authService.generateAccessToken({
+        id: user.id,
+        username: user.username,
+        roles: user.roles,
+        permissions: user.permissions,
+        isAdmin: user.isAdmin
+      })
+      vo.refresh_token = this.authService.generateRefreshToken(user.id)
+
       return vo
     } catch (e) {
       throw new UnauthorizedException('token 已失效，请重新登录')

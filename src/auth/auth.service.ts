@@ -7,15 +7,19 @@ import {
 } from '@nestjs/common'
 import { SignupDto } from './dto/signup.dto'
 import { RedisService } from 'src/redis/redis.service'
-import { Role } from 'src/user/entities/role.entity'
+
 import { User } from 'src/user/entities/user.entity'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Permission } from 'src/user/entities/permission.entity'
+
 import { md5 } from 'src/utils'
 import { UserService } from 'src/user/user.service'
 import { LoginDto } from './dto/login.dto'
 import { LoginVo } from './vo/login.vo'
+
+import { JwtService } from '@nestjs/jwt'
+import { ConfigService } from '@nestjs/config'
+import { AuthUserDto } from './dto/auth-user.dto'
 
 @Injectable()
 export class AuthService {
@@ -24,18 +28,18 @@ export class AuthService {
   @InjectRepository(User)
   private userRepository: Repository<User>
 
-  @InjectRepository(Role)
-  private roleRepository: Repository<Role>
-
-  @InjectRepository(Permission)
-  private permissionRepository: Repository<Permission>
-
   @Inject(RedisService)
   private redisService: RedisService
 
+  @Inject(JwtService)
+  private jwtService: JwtService
+
+  @Inject(ConfigService)
+  private configService: ConfigService
+
   async signup(user: SignupDto) {
     const captcha = await this.redisService.get(`captcha_${user.email}`)
-
+    console.log(captcha, 'captcha')
     if (!captcha)
       throw new HttpException('验证码已失效', HttpStatus.BAD_REQUEST)
 
@@ -105,6 +109,8 @@ export class AuthService {
 
     return vo
   }
+
+  //获取登录的时候个人信息 权限认证
   async findUserById(userId: number) {
     const user = await this.userRepository.findOne({
       where: {
@@ -126,5 +132,31 @@ export class AuthService {
         return arr
       }, [])
     }
+  }
+
+  // 生成 access token
+  generateAccessToken(authUser: AuthUserDto) {
+    return this.jwtService.sign(
+      {
+        ...authUser
+      },
+      {
+        expiresIn:
+          this.configService.get('jwt_access_token_expires_time') || '30m'
+      }
+    )
+  }
+
+  // 生成 refresh token
+  generateRefreshToken(userId: number) {
+    return this.jwtService.sign(
+      {
+        userId
+      },
+      {
+        expiresIn:
+          this.configService.get('jwt_refresh_token_expres_time') || '7d'
+      }
+    )
   }
 }
