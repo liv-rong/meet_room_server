@@ -52,7 +52,7 @@ export class BookingService {
 
     if (bookingTimeRangeStart) {
       if (!bookingTimeRangeEnd) {
-        bookingTimeRangeEnd = bookingTimeRangeStart + 60 * 60 * 1000
+        bookingTimeRangeEnd = bookingTimeRangeStart + 60 * 60 * 1000 * 12
       }
       condition.startTime = Between(
         new Date(bookingTimeRangeStart),

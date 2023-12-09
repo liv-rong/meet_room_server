@@ -1,6 +1,6 @@
 import { Controller, DefaultValuePipe, Get, Param, Query } from '@nestjs/common'
 import { BookingService } from './booking.service'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiOperation, ApiTags } from '@nestjs/swagger'
 import { generateParseIntPipe } from 'src/utils'
 
 @ApiTags('预定管理模块')
@@ -8,6 +8,7 @@ import { generateParseIntPipe } from 'src/utils'
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
 
+  @ApiOperation({ summary: '预定列表' })
   @Get('list')
   async list(
     @Query('pageNo', new DefaultValuePipe(1), generateParseIntPipe('pageNo'))

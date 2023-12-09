@@ -12,13 +12,13 @@ import {
   UnauthorizedException
 } from '@nestjs/common'
 import { AuthService } from './auth.service'
-import { SignupDto } from './dto/signup.dto'
 import { ApiBody, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger'
-import { LoginDto } from './dto/login.dto'
 import { EmailService } from 'src/email/email.service'
 import { RedisService } from 'src/redis/redis.service'
 import { JwtService } from '@nestjs/jwt'
 import { RefreshTokenVo } from './vo/refresh-token.vo'
+import { UpdateUserPasswordDto, LoginDto, SignupDto } from './dto'
+import { UserInfo } from './vo'
 
 @ApiTags('权限')
 @Controller('auth')
@@ -82,8 +82,6 @@ export class AuthController {
     const code = Math.random().toString().slice(2, 8)
 
     const a = await this.redisService.set(`captcha_${address}`, code, 5 * 60)
-    console.log(a, 'a')
-    console.log(await this.redisService.get(`captcha_${address}`), 'get')
     await this.emailService.sendMail({
       to: address,
       subject: '注册验证码',
@@ -130,5 +128,44 @@ export class AuthController {
     } catch (e) {
       throw new UnauthorizedException('token 已失效，请重新登录')
     }
+  }
+
+  // 发送邮箱验证码的接口
+  @ApiQuery({
+    name: 'address',
+    description: '邮箱地址',
+    type: String
+  })
+  @ApiResponse({
+    type: String,
+    description: '发送成功'
+  })
+  @Get('update_password/captcha')
+  async updatePasswordCaptcha(@Query('address') address: string) {
+    const code = Math.random().toString().slice(2, 8)
+    await this.redisService.set(
+      `update_password_captcha_${address}`,
+      code,
+      10 * 60 * 60
+    )
+    await this.emailService.sendMail({
+      to: address,
+      subject: '更改密码验证码',
+      html: `<p>你的更改密码验证码是 ${code}</p>`
+    })
+    return '发送成功'
+  }
+
+  //更新密码接口
+  @ApiBody({
+    type: UpdateUserPasswordDto
+  })
+  @ApiResponse({
+    type: String,
+    description: '验证码已失效/不正确'
+  })
+  @Post(['update_password', 'admin/update_password'])
+  async updatePassword(@Body() passwordDto: UpdateUserPasswordDto) {
+    await this.authService.updatePassword(passwordDto)
   }
 }

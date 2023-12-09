@@ -3,14 +3,8 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   Inject,
   Query,
-  UnauthorizedException,
-  ParseIntPipe,
-  BadRequestException,
   DefaultValuePipe,
   HttpStatus
 } from '@nestjs/common'
@@ -21,10 +15,8 @@ import { EmailService } from 'src/email/email.service'
 import { RedisService } from 'src/redis/redis.service'
 
 import { JwtService } from '@nestjs/jwt'
-import { ConfigService } from '@nestjs/config'
 import { RequireLogin, UserInfo } from 'src/custom.decorator'
 import { UserDetailVo } from './vo/user-info.vo'
-import { UpdateUserPasswordDto } from './dto/update-user-password.dto'
 import { generateParseIntPipe } from 'src/utils'
 import {
   ApiBearerAuth,
@@ -47,9 +39,6 @@ export class UserController {
 
   @Inject(JwtService)
   private jwtService: JwtService
-
-  @Inject(ConfigService)
-  private configService: ConfigService
 
   constructor(private readonly userService: UserService) {}
 
@@ -79,55 +68,6 @@ export class UserController {
     vo.createTime = user.createTime
     vo.isFrozen = user.isFrozen
     return vo
-  }
-
-  // 更新密码的接口
-  @ApiBearerAuth()
-  @ApiBody({
-    type: UpdateUserPasswordDto
-  })
-  @ApiResponse({
-    type: String,
-    description: '验证码已失效/不正确'
-  })
-  @Post(['update_password', 'admin/update_password'])
-  @RequireLogin()
-  async updatePassword(
-    @UserInfo('userId') userId: number,
-    @Body() passwordDto: UpdateUserPasswordDto
-  ) {
-    console.log(passwordDto)
-    await this.userService.updatePassword(userId, passwordDto)
-  }
-
-  // 发送邮箱验证码的接口
-  @ApiBearerAuth()
-  @ApiQuery({
-    name: 'address',
-    description: '邮箱地址',
-    type: String
-  })
-  @ApiResponse({
-    type: String,
-    description: '发送成功'
-  })
-  @RequireLogin()
-  @Get('update_password/captcha')
-  async updatePasswordCaptcha(@Query('address') address: string) {
-    const code = Math.random().toString().slice(2, 8)
-
-    await this.redisService.set(
-      `update_password_captcha_${address}`,
-      code,
-      10 * 60 * 60
-    )
-
-    await this.emailService.sendMail({
-      to: address,
-      subject: '更改密码验证码',
-      html: `<p>你的更改密码验证码是 ${code}</p>`
-    })
-    return '发送成功'
   }
 
   //修改个人信息接口

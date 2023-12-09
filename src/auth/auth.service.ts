@@ -20,6 +20,7 @@ import { LoginVo } from './vo/login.vo'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import { AuthUserDto } from './dto/auth-user.dto'
+import { UpdateUserPasswordDto } from './dto'
 
 @Injectable()
 export class AuthService {
@@ -158,5 +159,33 @@ export class AuthService {
           this.configService.get('jwt_refresh_token_expres_time') || '7d'
       }
     )
+  }
+
+  async updatePassword(passwordDto: UpdateUserPasswordDto) {
+    const captcha = await this.redisService.get(
+      `update_password_captcha_${passwordDto.email}`
+    )
+
+    if (!captcha) {
+      throw new HttpException('验证码已失效', HttpStatus.BAD_REQUEST)
+    }
+
+    const foundUser = await this.userRepository.findOneBy({
+      username: passwordDto.username
+    })
+    console.log(foundUser, 'foundUser')
+    if (foundUser.email !== passwordDto.email) {
+      throw new HttpException('邮箱不正确', HttpStatus.BAD_REQUEST)
+    }
+
+    foundUser.password = md5(passwordDto.password)
+
+    try {
+      await this.userRepository.save(foundUser)
+      return '密码修改成功'
+    } catch (e) {
+      this.logger.error(e, UserService)
+      return '密码修改失败'
+    }
   }
 }

@@ -15,14 +15,10 @@ export class Booking {
   @PrimaryGeneratedColumn()
   id: number
 
-  @Column({
-    comment: '会议开始时间'
-  })
+  @Column({ comment: '会议开始时间' })
   startTime: Date
 
-  @Column({
-    comment: '会议结束时间'
-  })
+  @Column({ comment: '会议结束时间' })
   endTime: Date
 
   @Column({

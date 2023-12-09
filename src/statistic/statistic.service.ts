@@ -15,6 +15,7 @@ export class StatisticService {
       .createQueryBuilder(Booking, 'b')
       .select('u.id', 'userId')
       .addSelect('u.username', 'username')
+      //添加聚合函数：使用.addSelect()方法添加聚合函数count(1)，并将其别名设置为bookingCount。该聚合函数用于计算每个用户的预订数量
       .leftJoin(User, 'u', 'b.userId = u.id')
       .addSelect('count(1)', 'bookingCount')
       .where('b.startTime between :time1 and :time2', {
