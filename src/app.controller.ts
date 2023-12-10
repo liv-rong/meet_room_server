@@ -1,10 +1,12 @@
-import { Controller, Get, SetMetadata } from '@nestjs/common'
+import { Controller, Get, Inject, Logger, SetMetadata } from '@nestjs/common'
 import { AppService } from './app.service'
-import { RequireLogin, UserInfo } from './custom.decorator'
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
+
+  // @Inject(WINSTON_LOGGER_TOKEN)
+  // private logger
 
   @Get()
   getHello(): string {
