@@ -6,7 +6,11 @@ import {
   Inject,
   Query,
   DefaultValuePipe,
-  HttpStatus
+  HttpStatus,
+  Param,
+  UploadedFile,
+  UseInterceptors,
+  BadRequestException
 } from '@nestjs/common'
 import { UserService } from './user.service'
 import { UpdateUserDto } from './dto/update-user.dto'
@@ -21,12 +25,16 @@ import { generateParseIntPipe } from 'src/utils'
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiOperation,
   ApiQuery,
   ApiResponse,
   ApiTags
 } from '@nestjs/swagger'
 
 import { UserListVo } from './vo/user-list.vo'
+import { FileInterceptor } from '@nestjs/platform-express/multer'
+import * as path from 'path'
+import { storage } from 'src/my-file-storage'
 
 @ApiTags('用户管理模块')
 @Controller('user')
@@ -49,6 +57,9 @@ export class UserController {
   }
 
   @ApiBearerAuth()
+  @ApiOperation({
+    description: '用户信息'
+  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'success',
@@ -84,7 +95,7 @@ export class UserController {
     description: '更新成功',
     type: String
   })
-  @Post(['update', 'admin/update'])
+  @Post(['update/info'])
   @RequireLogin()
   async update(
     @UserInfo('userId') userId: number,
@@ -93,40 +104,25 @@ export class UserController {
     return await this.userService.update(userId, updateUserDto)
   }
 
-  //更新验证码
-  @Get('update/captcha')
-  async updateCaptcha(@Query('address') address: string) {
-    const code = Math.random().toString().slice(2, 8)
-
-    await this.redisService.set(
-      `update_user_captcha_${address}`,
-      code,
-      10 * 60 * 60
-    )
-
-    await this.emailService.sendMail({
-      to: address,
-      subject: '更改用户信息验证码',
-      html: `<p>你的验证码是 ${code}</p>`
-    })
-    return '发送成功'
-  }
-
-  //冻结用户
+  //冻结用户或者启用
   @ApiBearerAuth()
   @ApiQuery({
     name: 'id',
     description: 'userId',
     type: Number
   })
+  @ApiBody({
+    description: '是否冻结',
+    type: Boolean
+  })
   @ApiResponse({
     type: String,
     description: 'success'
   })
   @RequireLogin()
-  @Get('freeze')
-  async freeze(@Query('id') userId: number) {
-    await this.userService.freezeUserById(userId)
+  @Post('isFreeze')
+  async freeze(@Query('id') userId: number, @Body() isFreeze: boolean) {
+    await this.userService.freezeUserById(userId, isFreeze)
     return 'success'
   }
 
@@ -164,9 +160,8 @@ export class UserController {
   @RequireLogin()
   @Get('list')
   async list(
-    @Query('pageNo', new DefaultValuePipe(1), generateParseIntPipe('pageNo'))
-    pageNo: number,
-
+    @Query('page', new DefaultValuePipe(1), generateParseIntPipe('page'))
+    page: number,
     @Query(
       'pageSize',
       new DefaultValuePipe(2),
@@ -177,18 +172,47 @@ export class UserController {
     @Query('nickName') nickName: string,
     @Query('email') email: string
   ) {
+    console.log('111111')
     const data = await this.userService.findUsers(
       username,
       nickName,
       email,
-      pageNo,
+      page,
       pageSize
     )
-
     const vo = new UserListVo()
 
     vo.users = data.users
     vo.totalCount = data.totalCount
     return vo
+  }
+
+  @ApiOperation({
+    description: '上传头像'
+  })
+  @ApiBody({
+    description: '图片'
+  })
+  @Post('upload')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      dest: 'uploads',
+      storage: storage,
+      limits: {
+        fileSize: 1024 * 1024 * 3
+      },
+      fileFilter(req, file, callback) {
+        const extname = path.extname(file.originalname)
+        if (['.png', '.jpg', '.gif'].includes(extname)) {
+          callback(null, true)
+        } else {
+          callback(new BadRequestException('只能上传图片'), false)
+        }
+      }
+    })
+  )
+  uploadFile(@UploadedFile() file: Express.Multer.File) {
+    console.log('file', file)
+    return file?.path
   }
 }

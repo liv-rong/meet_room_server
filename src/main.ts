@@ -7,9 +7,14 @@ import { InvokeRecordInterceptor } from './invoke-record.interceptor'
 import { UnloginFilter } from './unlogin.filter'
 import { CustomExceptionFilter } from './custom-exception.filter'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { NestExpressApplication } from '@nestjs/platform-express'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create<NestExpressApplication>(AppModule)
+
+  app.useStaticAssets('uploads', {
+    prefix: '/uploads'
+  })
 
   app.useGlobalPipes(new ValidationPipe())
   app.useGlobalInterceptors(new FormatResponseInterceptor())

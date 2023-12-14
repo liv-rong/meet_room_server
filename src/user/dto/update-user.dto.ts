@@ -20,9 +20,6 @@ export class UpdateUserDto {
   @ApiProperty()
   email: string
 
-  @IsNotEmpty({
-    message: '验证码不能为空'
-  })
   @ApiProperty()
-  captcha: string
+  phoneNumber: string
 }

@@ -80,50 +80,39 @@ export class UserService {
         id: userId
       }
     })
-
     return user
   }
 
   async update(userId: number, updateUserDto: UpdateUserDto) {
-    const captcha = await this.redisService.get(
-      `update_user_captcha_${updateUserDto.email}`
-    )
-
-    if (!captcha) {
-      throw new HttpException('验证码已失效', HttpStatus.BAD_REQUEST)
-    }
-
-    if (updateUserDto.captcha !== captcha) {
-      throw new HttpException('验证码不正确', HttpStatus.BAD_REQUEST)
-    }
-
     const foundUser = await this.userRepository.findOneBy({
       id: userId
     })
-
     if (updateUserDto.nickName) {
       foundUser.nickName = updateUserDto.nickName
     }
     if (updateUserDto.headPic) {
       foundUser.headPic = updateUserDto.headPic
     }
-
+    if (updateUserDto.phoneNumber) {
+      foundUser.phoneNumber = updateUserDto.phoneNumber
+    }
+    if (updateUserDto.email) {
+      foundUser.email = updateUserDto.email
+    }
     try {
       await this.userRepository.save(foundUser)
       return '用户信息修改成功'
     } catch (e) {
       this.logger.error(e, UserService)
-      return '用户信息修改成功'
+      return '用户信息修改失败'
     }
   }
 
-  async freezeUserById(id: number) {
+  async freezeUserById(id: number, isFrozen: boolean) {
     const user = await this.userRepository.findOneBy({
       id
     })
-
-    user.isFrozen = true
-
+    user.isFrozen = isFrozen
     await this.userRepository.save(user)
   }
 
@@ -131,10 +120,10 @@ export class UserService {
     username: string,
     nickName: string,
     email: string,
-    pageNo: number,
+    page: number,
     pageSize: number
   ) {
-    const skipCount = (pageNo - 1) * pageSize
+    const skipCount = (page - 1) * pageSize
 
     const condition: Record<string, any> = {}
 

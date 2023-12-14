@@ -50,13 +50,14 @@ export class LoginGuard implements CanActivate {
     const authorization = request.headers.authorization
 
     if (!authorization) {
+      console.log(authorization, '用户未登录')
       throw new UnauthorizedException('用户未登录')
     }
 
     try {
       const token = authorization.split(' ')[1]
       const data = this.jwtService.verify<JwtUserData>(token)
-
+      console.log(token, data, 'try')
       request.user = {
         userId: data.userId,
         username: data.username,
@@ -65,7 +66,7 @@ export class LoginGuard implements CanActivate {
       }
       return true
     } catch (e) {
-      throw new UnLoginException()
+      throw new UnLoginException('token过期')
     }
   }
 }
