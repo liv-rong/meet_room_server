@@ -186,20 +186,11 @@ export class UserController {
     return vo
   }
 
-  @ApiOperation({
-    description: '上传头像'
-  })
-  @ApiBody({
-    description: '图片'
-  })
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('file', {
       dest: 'uploads',
       storage: storage,
-      limits: {
-        fileSize: 1024 * 1024 * 3
-      },
       fileFilter(req, file, callback) {
         const extname = path.extname(file.originalname)
         if (['.png', '.jpg', '.gif'].includes(extname)) {
@@ -210,8 +201,10 @@ export class UserController {
       }
     })
   )
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
-    console.log('file', file)
-    return file?.path
+  uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @UserInfo('userId') userId: number
+  ) {
+    return await this.userService.uploadFile(file?.path, userId)
   }
 }

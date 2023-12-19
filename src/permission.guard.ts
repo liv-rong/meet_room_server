@@ -20,6 +20,7 @@ export class PermissionGuard implements CanActivate {
       return true
     }
 
+    //本来的角色
     const permissions = request.user.permissions
 
     const requiredPermissions = this.reflector.getAllAndOverride<string[]>(
