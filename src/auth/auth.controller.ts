@@ -12,7 +12,13 @@ import {
   UnauthorizedException
 } from '@nestjs/common'
 import { AuthService } from './auth.service'
-import { ApiBody, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger'
+import {
+  ApiBody,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags
+} from '@nestjs/swagger'
 import { EmailService } from 'src/email/email.service'
 import { RedisService } from 'src/redis/redis.service'
 import { JwtService } from '@nestjs/jwt'
@@ -34,6 +40,7 @@ export class AuthController {
 
   constructor(private readonly authService: AuthService) {}
 
+  @ApiOperation({ summary: '注册' })
   @ApiBody({ type: SignupDto })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
@@ -50,6 +57,7 @@ export class AuthController {
     return await this.authService.signup(signupData)
   }
 
+  @ApiOperation({ summary: '登录' })
   @Post('/login')
   async login(@Body() loginUser: LoginDto) {
     const vo = await this.authService.login(loginUser)
@@ -65,6 +73,7 @@ export class AuthController {
     return vo
   }
 
+  @ApiOperation({ summary: '获取注册邮箱验证码' })
   @ApiQuery({
     name: 'address',
     type: String,
@@ -90,6 +99,7 @@ export class AuthController {
     return '发送成功'
   }
 
+  @ApiOperation({ summary: '刷新token' })
   @ApiQuery({
     name: 'refreshToken',
     type: String,
@@ -131,6 +141,7 @@ export class AuthController {
   }
 
   // 发送邮箱验证码的接口
+  @ApiOperation({ summary: '更新密码邮箱验证码的接口' })
   @ApiQuery({
     name: 'address',
     description: '邮箱地址',
@@ -156,7 +167,7 @@ export class AuthController {
     return '发送成功'
   }
 
-  //更新密码接口
+  @ApiOperation({ summary: '更新密码' })
   @ApiBody({
     type: UpdateUserPasswordDto
   })

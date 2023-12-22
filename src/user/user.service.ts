@@ -158,18 +158,4 @@ export class UserService {
       totalCount
     }
   }
-
-  uploadFile(path: string, id: number) {
-    const foundUser = await this.userRepository.findOneBy({
-      id: userId
-    })
-    foundUser.headPic = path
-    try {
-      await this.userRepository.save(foundUser)
-      return path
-    } catch (e) {
-      this.logger.error(e, UserService)
-      return '用户信息修改失败'
-    }
-  }
 }

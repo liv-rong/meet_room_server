@@ -22,7 +22,7 @@ import {
 } from '@nestjs/swagger'
 import { CreateMeetingRoomDto } from './dto/create-meeting-room.dto'
 import { UpdateMeetingRoomDto } from './dto/update-meeting-room.dto'
-import { RequireLogin } from 'src/custom.decorator'
+import { RequireLogin } from 'src/decorator/custom.decorator'
 
 @ApiTags('会议室管理模块')
 @Controller('meeting-room')

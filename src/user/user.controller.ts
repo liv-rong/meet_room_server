@@ -19,7 +19,7 @@ import { EmailService } from 'src/email/email.service'
 import { RedisService } from 'src/redis/redis.service'
 
 import { JwtService } from '@nestjs/jwt'
-import { RequireLogin, UserInfo } from 'src/custom.decorator'
+import { RequireLogin, UserInfo } from 'src/decorator/custom.decorator'
 import { UserDetailVo } from './vo/user-info.vo'
 import { generateParseIntPipe } from 'src/utils'
 import {
@@ -34,7 +34,7 @@ import {
 import { UserListVo } from './vo/user-list.vo'
 import { FileInterceptor } from '@nestjs/platform-express/multer'
 import * as path from 'path'
-import { storage } from 'src/my-file-storage'
+import { storage } from 'src/utils/my-file-storage'
 
 @ApiTags('用户管理模块')
 @Controller('user')
@@ -57,9 +57,7 @@ export class UserController {
   }
 
   @ApiBearerAuth()
-  @ApiOperation({
-    description: '用户信息'
-  })
+  @ApiOperation({ description: '用户信息' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'success',
@@ -82,6 +80,7 @@ export class UserController {
   }
 
   //修改个人信息接口
+  @ApiOperation({ description: '修改个人信息' })
   @ApiBearerAuth()
   @ApiBody({
     type: UpdateUserDto
@@ -104,7 +103,7 @@ export class UserController {
     return await this.userService.update(userId, updateUserDto)
   }
 
-  //冻结用户或者启用
+  @ApiOperation({ summary: '冻结用户或者启用' })
   @ApiBearerAuth()
   @ApiQuery({
     name: 'id',
@@ -126,7 +125,7 @@ export class UserController {
     return 'success'
   }
 
-  //用户列表接口
+  @ApiOperation({ summary: '用户列表接口' })
   @ApiBearerAuth()
   @ApiQuery({
     name: 'pageNo',
@@ -184,27 +183,5 @@ export class UserController {
     vo.users = data.users
     vo.totalCount = data.totalCount
     return vo
-  }
-
-  @Post('upload')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      dest: 'uploads',
-      storage: storage,
-      fileFilter(req, file, callback) {
-        const extname = path.extname(file.originalname)
-        if (['.png', '.jpg', '.gif'].includes(extname)) {
-          callback(null, true)
-        } else {
-          callback(new BadRequestException('只能上传图片'), false)
-        }
-      }
-    })
-  )
-  uploadFile(
-    @UploadedFile() file: Express.Multer.File,
-    @UserInfo('userId') userId: number
-  ) {
-    return await this.userService.uploadFile(file?.path, userId)
   }
 }

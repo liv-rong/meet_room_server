@@ -36,21 +36,25 @@ export class BookingController {
     )
   }
 
+  @ApiOperation({ summary: '根据ID得到预定信息' })
   @Get('apply/:id')
   async apply(@Param('id') id: number) {
     return this.bookingService.apply(id)
   }
 
+  @ApiOperation({ summary: '审批驳回' })
   @Get('reject/:id')
   async reject(@Param('id') id: number) {
     return this.bookingService.reject(id)
   }
 
+  @ApiOperation({ summary: '已解除' })
   @Get('unbind/:id')
   async unbind(@Param('id') id: number) {
     return this.bookingService.unbind(id)
   }
 
+  @ApiOperation({ summary: '催促审批' })
   @Get('urge/:id')
   async urge(@Param('id') id: number) {
     return this.bookingService.urge(id)

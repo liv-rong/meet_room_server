@@ -12,14 +12,15 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { JWTModel } from './class'
 import { JwtModule } from '@nestjs/jwt'
 import { APP_GUARD } from '@nestjs/core'
-import { LoginGuard } from './login.guard'
-import { PermissionGuard } from './permission.guard'
+import { LoginGuard } from './guard/login.guard'
+import { PermissionGuard } from './guard/permission.guard'
 import { AuthModule } from './auth/auth.module'
 import { MeetingRoomModule } from './meeting-room/meeting-room.module'
 import { MeetingRoom } from './meeting-room/entities/meeting-room.entity'
 import { BookingModule } from './booking/booking.module'
 import { Booking } from './booking/entities/booking.entity'
 import { StatisticModule } from './statistic/statistic.module'
+import { UploadModule } from './upload/upload.module'
 
 @Module({
   imports: [
@@ -66,7 +67,8 @@ import { StatisticModule } from './statistic/statistic.module'
     AuthModule,
     MeetingRoomModule,
     BookingModule,
-    StatisticModule
+    StatisticModule,
+    UploadModule
   ],
   controllers: [AppController],
   providers: [
