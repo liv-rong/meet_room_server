@@ -108,12 +108,14 @@ export class UserService {
     }
   }
 
-  async freezeUserById(id: number, isFrozen: boolean) {
+  async freezeUserById(id: number, isEnable: boolean) {
     const user = await this.userRepository.findOneBy({
       id
     })
-    user.isFrozen = isFrozen
-    await this.userRepository.save(user)
+    user.isFrozen = isEnable
+    console.log(user, 'user')
+    const a = await this.userRepository.save(user)
+    console.log(a, 'a')
   }
 
   async findUsers(

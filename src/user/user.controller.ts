@@ -14,11 +14,6 @@ import {
 } from '@nestjs/common'
 import { UserService } from './user.service'
 import { UpdateUserDto } from './dto/update-user.dto'
-
-import { EmailService } from 'src/email/email.service'
-import { RedisService } from 'src/redis/redis.service'
-
-import { JwtService } from '@nestjs/jwt'
 import { RequireLogin, UserInfo } from 'src/decorator/custom.decorator'
 import { UserDetailVo } from './vo/user-info.vo'
 import { generateParseIntPipe } from 'src/utils'
@@ -32,24 +27,13 @@ import {
 } from '@nestjs/swagger'
 
 import { UserListVo } from './vo/user-list.vo'
-import { FileInterceptor } from '@nestjs/platform-express/multer'
-import * as path from 'path'
-import { storage } from 'src/utils/my-file-storage'
 
 @ApiTags('用户管理模块')
 @Controller('user')
 export class UserController {
-  @Inject(EmailService)
-  private emailService: EmailService
-
-  @Inject(RedisService)
-  private redisService: RedisService
-
-  @Inject(JwtService)
-  private jwtService: JwtService
-
   constructor(private readonly userService: UserService) {}
 
+  @ApiOperation({ summary: '初始化数据' })
   @Get('init-data')
   async initData() {
     await this.userService.initData()
@@ -57,7 +41,7 @@ export class UserController {
   }
 
   @ApiBearerAuth()
-  @ApiOperation({ description: '用户信息' })
+  @ApiOperation({ summary: '用户信息' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'success',
@@ -80,7 +64,7 @@ export class UserController {
   }
 
   //修改个人信息接口
-  @ApiOperation({ description: '修改个人信息' })
+  @ApiOperation({ summary: '修改个人信息' })
   @ApiBearerAuth()
   @ApiBody({
     type: UpdateUserDto
@@ -120,15 +104,18 @@ export class UserController {
   })
   @RequireLogin()
   @Post('isFreeze')
-  async freeze(@Query('id') userId: number, @Body() isFreeze: boolean) {
-    await this.userService.freezeUserById(userId, isFreeze)
+  async freeze(
+    @Query('id') userId: number,
+    @Body() isEnable: { isEnable: boolean }
+  ) {
+    await this.userService.freezeUserById(userId, isEnable.isEnable)
     return 'success'
   }
 
   @ApiOperation({ summary: '用户列表接口' })
   @ApiBearerAuth()
   @ApiQuery({
-    name: 'pageNo',
+    name: 'page',
     description: '第几页',
     type: Number
   })
@@ -179,7 +166,6 @@ export class UserController {
       pageSize
     )
     const vo = new UserListVo()
-
     vo.users = data.users
     vo.totalCount = data.totalCount
     return vo
