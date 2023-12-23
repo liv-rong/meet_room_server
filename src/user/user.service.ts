@@ -80,7 +80,10 @@ export class UserService {
       username: createUserDto.username
     })
     if (findUser) throw new HttpException('用户已存在', HttpStatus.BAD_REQUEST)
-    return await this.userRepository.save(createUserDto)
+    const newUser = new User()
+    newUser.username = createUserDto.username
+    newUser.password = md5(createUserDto.password)
+    return await this.userRepository.save(newUser)
   }
 
   async findUserDetailById(userId: number) {
