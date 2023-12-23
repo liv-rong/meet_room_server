@@ -3,14 +3,14 @@ import {
   Get,
   Post,
   Body,
-  Inject,
   Query,
   DefaultValuePipe,
   HttpStatus,
   Param,
-  UploadedFile,
-  UseInterceptors,
-  BadRequestException
+  Put,
+  ParseIntPipe,
+  Patch,
+  Delete
 } from '@nestjs/common'
 import { UserService } from './user.service'
 import { UpdateUserDto } from './dto/update-user.dto'
@@ -20,6 +20,8 @@ import { generateParseIntPipe } from 'src/utils'
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiCreatedResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiResponse,
@@ -27,6 +29,7 @@ import {
 } from '@nestjs/swagger'
 
 import { UserListVo } from './vo/user-list.vo'
+import { CreateUserDto, PatchUserDto } from './dto'
 
 @ApiTags('用户管理模块')
 @Controller('user')
@@ -38,6 +41,12 @@ export class UserController {
   async initData() {
     await this.userService.initData()
     return 'done'
+  }
+
+  @ApiOperation({ summary: '创建用户' })
+  @Post()
+  async create(@Body() createUserDto: CreateUserDto) {
+    return await this.userService.create(createUserDto)
   }
 
   @ApiBearerAuth()
@@ -52,6 +61,7 @@ export class UserController {
   async info(@UserInfo('userId') userId: number) {
     const user = await this.userService.findUserDetailById(userId)
     const vo = new UserDetailVo()
+
     vo.id = user.id
     vo.email = user.email
     vo.username = user.username
@@ -63,8 +73,7 @@ export class UserController {
     return vo
   }
 
-  //修改个人信息接口
-  @ApiOperation({ summary: '修改个人信息' })
+  @ApiOperation({ summary: '更新个人信息' })
   @ApiBearerAuth()
   @ApiBody({
     type: UpdateUserDto
@@ -78,13 +87,32 @@ export class UserController {
     description: '更新成功',
     type: String
   })
-  @Post(['update/info'])
   @RequireLogin()
+  @Put(':id(\\d+)')
   async update(
-    @UserInfo('userId') userId: number,
+    @Param('id', new ParseIntPipe()) id: number,
     @Body() updateUserDto: UpdateUserDto
   ) {
-    return await this.userService.update(userId, updateUserDto)
+    return await this.userService.update(id, updateUserDto)
+  }
+
+  @ApiOperation({ summary: '修改个人信息' })
+  @ApiBearerAuth()
+  @ApiBody({
+    type: PatchUserDto
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '更新成功',
+    type: String
+  })
+  @RequireLogin()
+  @Patch(':id(\\d+)')
+  async patch(
+    @Param('id', new ParseIntPipe()) id: number,
+    @Body() patchUserDto: PatchUserDto
+  ) {
+    return await this.userService.patch(id, patchUserDto)
   }
 
   @ApiOperation({ summary: '冻结用户或者启用' })
@@ -169,5 +197,13 @@ export class UserController {
     vo.users = data.users
     vo.totalCount = data.totalCount
     return vo
+  }
+
+  //删除用户
+  @ApiOperation({ summary: '删除用户' })
+  @ApiOkResponse()
+  @Delete(':id(\\d+)')
+  async remove(@Param('id', new ParseIntPipe()) id: number) {
+    return await this.userService.remove(id)
   }
 }

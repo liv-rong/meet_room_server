@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 
 export class UserDetailVo {
   @ApiProperty()
@@ -7,21 +7,21 @@ export class UserDetailVo {
   @ApiProperty()
   username: string
 
-  @ApiProperty()
-  nickName: string
+  @ApiPropertyOptional({ description: '昵称' })
+  nickName?: string
 
-  @ApiProperty()
-  email: string
+  @ApiPropertyOptional({ description: '邮箱' })
+  email?: string
 
-  @ApiProperty()
-  headPic: string
+  @ApiPropertyOptional({ description: '头像' })
+  headPic?: string
 
-  @ApiProperty()
-  phoneNumber: string
+  @ApiPropertyOptional({ description: '电话' })
+  phoneNumber?: string
 
-  @ApiProperty()
+  @ApiProperty({ description: '是否冻结' })
   isFrozen: boolean
 
-  @ApiProperty()
+  @ApiProperty({ description: '创建时间' })
   createTime: Date
 }

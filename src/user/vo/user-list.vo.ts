@@ -8,19 +8,19 @@ class User {
   username: string
 
   @ApiProperty()
-  nickName: string
+  nickName?: string
 
   @ApiProperty()
-  email: string
+  email?: string
 
   @ApiProperty()
-  phoneNumber: string
+  phoneNumber?: string
 
   @ApiProperty()
   isFrozen: boolean
 
   @ApiProperty()
-  headPic: string
+  headPic?: string
 
   @ApiProperty()
   createTime: Date

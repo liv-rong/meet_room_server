@@ -17,6 +17,7 @@ import { Permission } from './entities/permission.entity'
 
 import { UpdateUserPasswordDto } from '../auth/dto/update-user-password.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
+import { CreateUserDto, PatchUserDto } from './dto'
 
 @Injectable()
 export class UserService {
@@ -74,6 +75,14 @@ export class UserService {
     await this.userRepository.save([user1, user2])
   }
 
+  async create(createUserDto: CreateUserDto) {
+    const findUser = await this.userRepository.findOneBy({
+      username: createUserDto.username
+    })
+    if (findUser) throw new HttpException('用户已存在', HttpStatus.BAD_REQUEST)
+    return await this.userRepository.save(createUserDto)
+  }
+
   async findUserDetailById(userId: number) {
     const user = await this.userRepository.findOne({
       where: {
@@ -83,25 +92,37 @@ export class UserService {
     return user
   }
 
-  async update(userId: number, updateUserDto: UpdateUserDto) {
+  //更新用户信息
+  async update(id: number, updateUserDto: UpdateUserDto) {
     const foundUser = await this.userRepository.findOneBy({
-      id: userId
+      id
     })
-    if (updateUserDto.nickName) {
-      foundUser.nickName = updateUserDto.nickName
-    }
-    if (updateUserDto.headPic) {
-      foundUser.headPic = updateUserDto.headPic
-    }
-    if (updateUserDto.phoneNumber) {
-      foundUser.phoneNumber = updateUserDto.phoneNumber
-    }
-    if (updateUserDto.email) {
-      foundUser.email = updateUserDto.email
-    }
+    if (!foundUser)
+      throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST)
+
+    const updatedUser = Object.assign(foundUser, updateUserDto)
     try {
-      await this.userRepository.save(foundUser)
-      return '用户信息修改成功'
+      const a = await this.userRepository.save(updatedUser)
+      return a
+    } catch (e) {
+      this.logger.error(e, UserService)
+      return '用户信息更新失败'
+    }
+  }
+
+  //修改用户信息
+  async patch(id: number, patchUserDto: PatchUserDto) {
+    const foundUser = await this.userRepository.findOneBy({
+      id
+    })
+    if (!foundUser)
+      throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST)
+
+    const patchUser = Object.assign(foundUser, patchUserDto)
+
+    try {
+      const a = await this.userRepository.save(patchUser)
+      return a
     } catch (e) {
       this.logger.error(e, UserService)
       return '用户信息修改失败'
@@ -159,5 +180,17 @@ export class UserService {
       users,
       totalCount
     }
+  }
+
+  async remove(id: number) {
+    // const user = await this.userRepository.findOneBy({ id })
+    // if(user){
+    // }
+    // await this.userRepository
+    //   .createQueryBuilder('users')
+    //   .delete()
+    //   .from(User)
+    //   .where('id = :id', { id })
+    //   .execute()
   }
 }

@@ -31,29 +31,31 @@ export class User {
   @Column({
     name: 'nick_name',
     length: 50,
-    comment: '昵称'
+    comment: '昵称',
+    nullable: true
   })
-  nickName: string
+  nickName?: string
 
   @Column({
     comment: '邮箱',
-    length: 50
+    length: 50,
+    nullable: true
   })
-  email: string
+  email?: string
 
   @Column({
     comment: '头像',
     length: 100,
     nullable: true
   })
-  headPic: string
+  headPic?: string
 
   @Column({
     comment: '手机号',
     length: 20,
     nullable: true
   })
-  phoneNumber: string
+  phoneNumber?: string
 
   @Column({
     comment: '是否冻结',
