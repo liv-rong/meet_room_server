@@ -56,12 +56,11 @@ export class UserController {
     description: 'success',
     type: UserDetailVo
   })
-  @Get('info')
+  @Get(':id(\\d+)')
   @RequireLogin()
-  async info(@UserInfo('userId') userId: number) {
-    const user = await this.userService.findUserDetailById(userId)
+  async info(@Param('id', new ParseIntPipe()) id: number) {
+    const user = await this.userService.findUserDetailById(id)
     const vo = new UserDetailVo()
-
     vo.id = user.id
     vo.email = user.email
     vo.username = user.username
