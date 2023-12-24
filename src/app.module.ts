@@ -21,6 +21,7 @@ import { BookingModule } from './booking/booking.module'
 import { Booking } from './booking/entities/booking.entity'
 import { StatisticModule } from './statistic/statistic.module'
 import { UploadModule } from './upload/upload.module'
+import { LargeFileModule } from './large-file/large-file.module'
 
 @Module({
   imports: [
@@ -68,7 +69,8 @@ import { UploadModule } from './upload/upload.module'
     MeetingRoomModule,
     BookingModule,
     StatisticModule,
-    UploadModule
+    UploadModule,
+    LargeFileModule
   ],
   controllers: [AppController],
   providers: [
