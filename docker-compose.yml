@@ -1,0 +1,24 @@
+services:
+  nest-app:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    depends_on:
+      - mysql-container
+      - redis-container
+    ports:
+      - '3000:3000'
+  mysql-container:
+    image: mysql
+     restart: always
+    ports:
+      - '3306:3306'
+    volumes:
+      - /Users/meet-room/mysql-data:/var/lib/mysql
+  redis-container:
+    image: redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data

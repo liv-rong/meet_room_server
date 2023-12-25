@@ -1,15 +1,11 @@
 import { Controller, Get, Inject, Logger, SetMetadata } from '@nestjs/common'
 import { AppService } from './app.service'
+import { ConfigService } from '@nestjs/config'
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  // @Inject(WINSTON_LOGGER_TOKEN)
-  // private logger
-
-  @Get()
-  getHello(): string {
-    return this.appService.getHello()
-  }
+  @Inject(ConfigService)
+  private configService: ConfigService
 }
