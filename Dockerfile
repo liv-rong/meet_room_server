@@ -1,4 +1,6 @@
-FROM node:lts-slim AS builder
+ FROM node:lts-slim AS builder
+
+
 
 WORKDIR /app
 

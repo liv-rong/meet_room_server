@@ -16,6 +16,8 @@ async function bootstrap() {
     prefix: '/uploads'
   })
 
+  app.useStaticAssets('static', { prefix: '/pages' })
+
   app.useGlobalPipes(new ValidationPipe())
   app.useGlobalInterceptors(new FormatResponseInterceptor())
   app.useGlobalInterceptors(new InvokeRecordInterceptor())

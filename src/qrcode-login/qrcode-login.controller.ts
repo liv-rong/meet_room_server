@@ -12,7 +12,9 @@ import { CreateQrcodeLoginDto } from './dto/create-qrcode-login.dto'
 import { UpdateQrcodeLoginDto } from './dto/update-qrcode-login.dto'
 import { randomUUID } from 'crypto'
 import * as qrcode from 'qrcode'
+import { ApiTags } from '@nestjs/swagger'
 
+@ApiTags('二维码登录模块')
 @Controller('qrcode')
 export class QrcodeLoginController {
   constructor(private readonly qrcodeLoginService: QrcodeLoginService) {}
@@ -25,7 +27,8 @@ export class QrcodeLoginController {
     )
     return {
       qrcode_id: uuid,
-      img: dataUrl
+      img: dataUrl + '111',
+      url: 'http://localhost:3000/pages'
     }
   }
 

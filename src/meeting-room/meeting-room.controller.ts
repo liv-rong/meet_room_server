@@ -15,6 +15,7 @@ import { generateParseIntPipe } from 'src/utils'
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiOperation,
   ApiParam,
   ApiQuery,
   ApiResponse,
@@ -29,9 +30,10 @@ import { RequireLogin } from 'src/decorator/custom.decorator'
 export class MeetingRoomController {
   constructor(private readonly meetingRoomService: MeetingRoomService) {}
 
+  @ApiOperation({ summary: '会议室列表' })
   @ApiBearerAuth()
   @ApiQuery({
-    name: 'pageNo',
+    name: 'page',
     description: '第几页',
     type: Number
   })
@@ -62,7 +64,7 @@ export class MeetingRoomController {
   @RequireLogin()
   @Get('list')
   async list(
-    @Query('pageNo', new DefaultValuePipe(1), generateParseIntPipe('pageNo'))
+    @Query('page', new DefaultValuePipe(1), generateParseIntPipe('pageNo'))
     pageNo: number,
     @Query(
       'pageSize',
@@ -83,6 +85,7 @@ export class MeetingRoomController {
     )
   }
 
+  @ApiOperation({ summary: '创建会议室' })
   @ApiResponse({
     description: '创建会议室失败'
   })
@@ -95,6 +98,7 @@ export class MeetingRoomController {
     return await this.meetingRoomService.create(meetingRoomDto)
   }
 
+  @ApiOperation({ summary: '更新会议室' })
   @ApiBody({
     type: UpdateMeetingRoomDto
   })
@@ -102,11 +106,15 @@ export class MeetingRoomController {
     status: HttpStatus.OK,
     description: '更新会议室成功'
   })
-  @Put('update')
-  async update(@Body() meetingRoomDto: UpdateMeetingRoomDto) {
-    return await this.meetingRoomService.update(meetingRoomDto)
+  @Put('update/:id')
+  async update(
+    @Param('id') id: number,
+    @Body() meetingRoomDto: UpdateMeetingRoomDto
+  ) {
+    return await this.meetingRoomService.update(id, meetingRoomDto)
   }
 
+  @ApiOperation({ summary: '查询会议室 id' })
   @ApiParam({
     type: 'id',
     name: 'id',
@@ -121,6 +129,7 @@ export class MeetingRoomController {
     return await this.meetingRoomService.findById(id)
   }
 
+  @ApiOperation({ summary: '删除会议室' })
   @ApiParam({
     type: 'id',
     name: 'id',

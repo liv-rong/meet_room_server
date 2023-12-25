@@ -4,21 +4,21 @@ services:
       context: ./
       dockerfile: ./Dockerfile
     depends_on:
-      - mysql-container
-      - redis-container
+      - mysql-meet-room
+      - redis-meet-room
     ports:
       - '3000:3000'
-  mysql-container:
+  mysql-meet-room:
     image: mysql
-     restart: always
+    restart: always
     ports:
       - '3306:3306'
     volumes:
       - /Users/meet-room/mysql-data:/var/lib/mysql
-  redis-container:
+  redis-meet-room:
     image: redis
     restart: always
     ports:
       - '6379:6379'
     volumes:
-      - redis_data:/data
+      - /Users/meet-room/redis_data:/data

@@ -10,16 +10,16 @@ export class MeetingRoomService {
   @InjectRepository(MeetingRoom)
   private repository: Repository<MeetingRoom>
   async find(
-    pageNo: number,
+    page: number,
     pageSize: number,
     name: string,
     capacity: number,
     equipment: string
   ) {
-    if (pageNo < 1) {
+    if (page < 1) {
       throw new BadRequestException('页码最小为 1')
     }
-    const skipCount = (pageNo - 1) * pageSize
+    const skipCount = (page - 1) * pageSize
 
     const condition: Record<string, any> = {}
 
@@ -56,9 +56,9 @@ export class MeetingRoomService {
     return await this.repository.save(meetingRoomDto)
   }
 
-  async update(meetingRoomDto: UpdateMeetingRoomDto) {
+  async update(id: number, meetingRoomDto: UpdateMeetingRoomDto) {
     const meetingRoom = await this.repository.findOneBy({
-      id: meetingRoomDto.id
+      id
     })
 
     if (!meetingRoom) {
