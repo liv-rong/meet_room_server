@@ -27,6 +27,8 @@
     "pnpm-lock.yaml",
     "README.md",
     "src-tauri",
-    "stats.html"
+    "stats.html",
+    "./uploads/**/**",
+    "./uploads/**"
   ]
 }
