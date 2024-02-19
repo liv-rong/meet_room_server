@@ -1,27 +1,75 @@
+# # services:
+# #   nest-app:
+# #     build:
+# #       context: ./
+# #       dockerfile: ./Dockerfile
+# #     depends_on:
+# #       - mysql-meet-room
+# #       - redis-meet-room
+# #     ports:
+# #       - '3000:3000'
+# #   mysql-meet-room:
+# #     image: mysql
+# #     restart: always
+# #     ports:
+# #       - '3306:3306'
+# #     volumes:
+# #       - /Users/meet-room/mysql-data:/var/lib/mysql
+# #   redis-meet-room:
+# #     image: redis
+# #     restart: always
+# #     ports:
+# #       - '6379:6379'
+# #     volumes:
+# #       - /Users/meet-room/redis_data:/data
+
+
+# version: '3.8'
 # services:
 #   nest-app:
 #     build:
 #       context: ./
 #       dockerfile: ./Dockerfile
 #     depends_on:
-#       - mysql-meet-room
-#       - redis-meet-room
+#       - mysql-container
+#       - redis-container
 #     ports:
-#       - '3000:3000'
-#   mysql-meet-room:
+#       - 3005:3005
+#     networks:
+#       - common-network
+#   mysql-container:
+#     container_name: meet-room-mysql
 #     image: mysql
 #     restart: always
-#     ports:
-#       - '3306:3306'
+#     environment:
+#     - MYSQL_ROOT_PASSWORD=123456
 #     volumes:
-#       - /Users/meet-room/mysql-data:/var/lib/mysql
-#   redis-meet-room:
+#     - mysql_data:/var/lib/meet-room-mysql/data
+#     networks:
+#     - common-network
+#     ports:
+#     - 3306:3306
+#     env_file:
+#     - .env
+#   redis-container:
+#     container_name: meet-room-redis
 #     image: redis
 #     restart: always
-#     ports:
-#       - '6379:6379'
 #     volumes:
-#       - /Users/meet-room/redis_data:/data
+#     - redis_data:/var/lib/redis/data
+#     networks:
+#     - common-network
+#     ports:
+#       - 6379:6379
+#     env_file:
+#     - .env
+# networks:
+#   common-network:
+#     driver: bridge
+
+# volumes:
+#   redis_data:
+#   mysql_data:
 
 
 version: '3.8'
@@ -38,27 +86,20 @@ services:
     networks:
       - common-network
   mysql-container:
-    container_name: meet-room-mysql
     image: mysql
-    restart: always
+    volumes:
+      - mysql_data:/var/lib/meet-room-mysql/data
     environment:
-    - MYSQL_ROOT_PASSWORD=123456
-    volumes:
-    - mysql_data:/var/lib/meet-room-mysql/data
+      MYSQL_DATABASE: meeting_room_booking_system
+      MYSQL_ROOT_PASSWORD: 123456
     networks:
-    - common-network
-    env_file:
-    - .env
+      - common-network
   redis-container:
-    container_name: meet-room-redis
     image: redis
-    restart: always
     volumes:
-    - redis_data:/var/lib/redis/data
+      - redis_data:/var/lib/redis/data
     networks:
-    - common-network
-    env_file:
-    - .env
+      - common-network
 networks:
   common-network:
     driver: bridge
@@ -66,5 +107,3 @@ networks:
 volumes:
   redis_data:
   mysql_data:
-
-
