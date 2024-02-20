@@ -97,9 +97,9 @@ WORKDIR /app
 
 RUN npm install -g pnpm
 
-RUN npm install --omit=dev
+RUN npm install -production
 
-EXPOSE 3005
+EXPOSE 3001
 
 CMD ["node", "/app/main.js"]
 
