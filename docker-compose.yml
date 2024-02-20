@@ -11,6 +11,7 @@ services:
     # networks:
     #   - common-network
   mysql-container:
+    container_name: meet_room_mysql
     image: mysql
     restart: always
     ports:
@@ -19,9 +20,12 @@ services:
       - mysql_data:/var/lib/meet-room-mysql/data
     environment:
       MYSQL_ROOT_PASSWORD: 123456
+    # network_mode:
+    # - "common-network"
     # networks:
-    #   - common-network
+    # - common-network
   redis-container:
+    container_name: meet_room_redis
     image: redis
     restart: always
     ports:
@@ -29,7 +33,12 @@ services:
     volumes:
       - redis_data:/var/lib/redis/data
     # networks:
-    #   - common-network
+    # - common-network
+    # network_mode:
+    # - "common-network"
+
+# docker-compose up -d redis
+# docker-compose up -d app
 
 volumes:
   redis_data:
