@@ -22,8 +22,7 @@ services:
       MYSQL_ROOT_PASSWORD: 123456
     # network_mode:
     # - "common-network"
-    # networks:
-    # - common-network
+
   redis-container:
     container_name: meet_room_redis
     image: redis
