@@ -1,48 +1,41 @@
-import {
-  Controller,
-  Get,
-  Inject,
-  Logger,
-  SetMetadata,
-  Sse
-} from '@nestjs/common'
-import { AppService } from './app.service'
-import { ConfigService } from '@nestjs/config'
-import { Observable } from 'rxjs'
-import { exec } from 'child_process'
-import { readFileSync } from 'fs'
+import { Controller, Inject, Sse } from "@nestjs/common";
+import { AppService } from "./app.service";
+import { ConfigService } from "@nestjs/config";
+import { Observable } from "rxjs";
+import { exec } from "child_process";
+// import { readFileSync } from 'fs'
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Inject(ConfigService)
-  private configService: ConfigService
+  private configService: ConfigService;
 
-  @Sse('stream')
+  @Sse("stream")
   stream() {
     return new Observable((observer) => {
-      observer.next({ data: { msg: 'aaa' } })
+      observer.next({ data: { msg: "aaa" } });
 
       setTimeout(() => {
-        observer.next({ data: { msg: 'bbb' } })
-      }, 2000)
+        observer.next({ data: { msg: "bbb" } });
+      }, 2000);
 
       setTimeout(() => {
-        observer.next({ data: { msg: 'ccc' } })
-      }, 5000)
-    })
+        observer.next({ data: { msg: "ccc" } });
+      }, 5000);
+    });
   }
 
-  @Sse('stream2')
+  @Sse("stream2")
   stream2() {
-    const childProcess = exec('tail -f ./log')
+    const childProcess = exec("tail -f ./log");
 
     return new Observable((observer) => {
-      childProcess.stdout.on('data', (msg) => {
-        observer.next({ data: { msg: msg.toString() } })
-      })
-    })
+      childProcess.stdout.on("data", (msg) => {
+        observer.next({ data: { msg: msg.toString() } });
+      });
+    });
   }
 
   // @Sse('stream3')
