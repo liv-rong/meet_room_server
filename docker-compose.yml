@@ -1,3 +1,7 @@
+
+networks:
+  common-network:
+    driver: bridge
 services:
   nest-app:
     build:
@@ -8,8 +12,8 @@ services:
       - mysql-container
     ports:
       - 3001:3001
-    # networks:
-    #   - common-network
+    networks:
+      - common-network
   mysql-container:
     container_name: meet_room_mysql
     image: mysql
@@ -20,19 +24,20 @@ services:
       - mysql_data:/var/lib/meet-room-mysql/data
     environment:
       MYSQL_ROOT_PASSWORD: 123456
-    # network_mode:
-    # - "common-network"
+    networks:
+      - common-network
 
   redis-container:
     container_name: meet_room_redis
     image: redis
+    command: redis-server --protected-mode no
     restart: always
     ports:
       - 6379:6379
     volumes:
       - redis_data:/var/lib/redis/data
-    # networks:
-    # - common-network
+    networks:
+    - common-network
     # network_mode:
     # - "common-network"
 
