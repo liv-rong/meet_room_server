@@ -99,9 +99,14 @@ RUN npm install -g pnpm
 
 RUN npm install -production
 
-RUN apt-get update && apt-get install -y redis-tools
+# RUN apt-get clean
 
-EXPOSE 3001
+# RUN apt-get update && apt-get install -y redis-tools
+
+
+RUN chown -R node:node /app
+
+EXPOSE 3000
 
 CMD ["node", "/app/main.js"]
 

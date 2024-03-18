@@ -1,7 +1,4 @@
-
-networks:
-  common-network:
-    driver: bridge
+version: '3.8'
 services:
   nest-app:
     build:
@@ -11,9 +8,10 @@ services:
       - redis-container
       - mysql-container
     ports:
-      - 3001:3001
+      - 3005:3005
     networks:
-      - common-network
+      - meet_room_server_common-network
+    restart: always
   mysql-container:
     container_name: meet_room_mysql
     image: mysql
@@ -23,9 +21,10 @@ services:
     volumes:
       - mysql_data:/var/lib/meet-room-mysql/data
     environment:
+      MYSQL_DATABASE: meeting_room_booking_system
       MYSQL_ROOT_PASSWORD: 123456
     networks:
-      - common-network
+      - meet_room_server_common-network
 
   redis-container:
     container_name: meet_room_redis
@@ -33,102 +32,16 @@ services:
     command: redis-server --protected-mode no
     restart: always
     ports:
-      - 6379:6379
+    - 6379:6379
     volumes:
-      - redis_data:/var/lib/redis/data
+    - redis_data:/var/lib/redis/data
     networks:
-    - common-network
-    # network_mode:
-    # - "common-network"
+    - meet_room_server_common-network
 
-# docker-compose up -d redis
-# docker-compose up -d app
+networks:
+  meet_room_server_common-network:
+    driver: bridge
 
 volumes:
   redis_data:
   mysql_data:
-
-
-# version: '3.8'
-# services:
-#   nest-app:
-#     build:
-#       context: ./
-#       dockerfile: ./Dockerfile
-#     depends_on:
-#       - mysql-container
-#       - redis-container
-#     ports:
-#       - 3005:3005
-#     networks:
-#       - common-network
-#   mysql-container:
-#     container_name: meet-room-mysql
-#     image: mysql
-#     restart: always
-#     environment:
-#     - MYSQL_ROOT_PASSWORD=123456
-#     volumes:
-#     - mysql_data:/var/lib/meet-room-mysql/data
-#     networks:
-#     - common-network
-#     ports:
-#     - 3306:3306
-#     env_file:
-#     - .env
-#   redis-container:
-#     container_name: meet-room-redis
-#     image: redis
-#     restart: always
-#     volumes:
-#     - redis_data:/var/lib/redis/data
-#     networks:
-#     - common-network
-#     ports:
-#       - 6379:6379
-#     env_file:
-#     - .env
-# networks:
-#   common-network:
-#     driver: bridge
-
-# volumes:
-#   redis_data:
-#   mysql_data:
-
-
-# version: '3.8'
-# services:
-#   nest-app:
-#     build:
-#       context: ./
-#       dockerfile: ./Dockerfile
-#     depends_on:
-#       - mysql-container
-#       - redis-container
-#     ports:
-#       - 3005:3005
-#     networks:
-#       - common-network
-#   mysql-container:
-#     image: mysql
-#     volumes:
-#       - mysql_data:/var/lib/meet-room-mysql/data
-#     environment:
-#       MYSQL_DATABASE: meeting_room_booking_system
-#       MYSQL_ROOT_PASSWORD: 123456
-#     networks:
-#       - common-network
-#   redis-container:
-#     image: redis
-#     volumes:
-#       - redis_data:/var/lib/redis/data
-#     networks:
-#       - common-network
-# networks:
-#   common-network:
-#     driver: bridge
-
-# volumes:
-#   redis_data:
-#   mysql_data:

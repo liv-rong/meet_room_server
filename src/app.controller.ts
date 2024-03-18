@@ -1,4 +1,4 @@
-import { Controller, Inject, Sse } from "@nestjs/common";
+import { Controller, Get, Inject, Sse } from "@nestjs/common";
 import { AppService } from "./app.service";
 import { ConfigService } from "@nestjs/config";
 import { Observable } from "rxjs";
@@ -36,6 +36,11 @@ export class AppController {
         observer.next({ data: { msg: msg.toString() } });
       });
     });
+  }
+
+  @Get()
+  getHello(): string {
+    return "Hello World!";
   }
 
   // @Sse('stream3')
