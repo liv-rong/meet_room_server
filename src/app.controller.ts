@@ -1,9 +1,10 @@
-import { Controller, Get, Inject, Sse } from "@nestjs/common";
+import { Controller, Get, Inject, Param, Sse } from "@nestjs/common";
 import { AppService } from "./app.service";
 import { ConfigService } from "@nestjs/config";
 import { Observable } from "rxjs";
 import { exec } from "child_process";
 // import { readFileSync } from 'fs'
+import { RedisService } from "src/redis/redis.service";
 
 @Controller()
 export class AppController {
@@ -11,6 +12,9 @@ export class AppController {
 
   @Inject(ConfigService)
   private configService: ConfigService;
+
+  @Inject(RedisService)
+  private redisService: RedisService;
 
   @Sse("stream")
   stream() {
@@ -38,9 +42,23 @@ export class AppController {
     });
   }
 
+  @Get("redis/:id")
+  async getHello(@Param("id") id: number): Promise<string> {
+    console.log(id, "id11111111");
+    // const handleId = id.toString() ?? '11111'
+    await this.redisService.set(`captcha_11111`, "handleId", 5 * 60);
+    const res = await this.redisService.get(`captcha_11111`);
+    return `Hello World!${res} +++ ${id}`;
+  }
+
+  @Get("/sww/:id")
+  getHello2(@Param("id") id: string): string {
+    return `Hello World!${id}`;
+  }
+
   @Get()
-  getHello(): string {
-    return "Hello World!";
+  getHello3(): string {
+    return `Hello World11111`;
   }
 
   // @Sse('stream3')
