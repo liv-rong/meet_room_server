@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   fe-app:
-    image: registry.cn-hangzhou.aliyuncs.com/ivy-rong/meet-room:aaa
+    image: registry.cn-hangzhou.aliyuncs.com/ivy-rong/meet-room:bbb
     ports:
       - 5173:5173
     depends_on:
