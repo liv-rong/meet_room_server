@@ -86,13 +86,43 @@ export class AuthController {
   async captcha(@Query("address") address: string) {
     const code = Math.random().toString().slice(2, 8);
 
+    console.log(code, "code");
+
     await this.redisService.set(`captcha_${address}`, code, 5 * 60);
+    // await this.emailService.sendMail({
+    //   to: address,
+    //   subject: "注册验证码",
+    //   html: `<p>你的注册验证码是 ${code}</p>`,
+    // });
+    return `发送成功${code}${address}`;
+  }
+
+  @Get("register-mail")
+  async captcha2(@Query("address") address: string) {
+    const code = Math.random().toString().slice(2, 8);
+    console.log(code, "code");
+
+    // await this.redisService.set(`captcha_${address}`, code, 5 * 60)
     await this.emailService.sendMail({
       to: address,
       subject: "注册验证码",
       html: `<p>你的注册验证码是 ${code}</p>`,
     });
-    return "发送成功";
+    return `发送成功${code}${address}`;
+  }
+
+  @Get("register-mail")
+  async captcha3(@Query("address") address: string) {
+    const code = Math.random().toString().slice(2, 8);
+    console.log(code, "code");
+
+    // await this.redisService.set(`captcha_${address}`, code, 5 * 60)
+    // await this.emailService.sendMail({
+    //   to: address,
+    //   subject: '注册验证码',
+    //   html: `<p>你的注册验证码是 ${code}</p>`
+    // })
+    return `发送成功${code}${address}`;
   }
 
   @ApiOperation({ summary: "刷新token" })
