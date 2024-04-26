@@ -1,14 +1,14 @@
 version: '3.8'
 services:
-  fe-app:
-    image: registry.cn-hangzhou.aliyuncs.com/ivy-rong/meet-room:bbb
-    ports:
-      - 5173:5173
-    depends_on:
-      - nest-app
-    networks:
-      - meet_room_server_common-network
-    restart: always
+  # fe-app:
+  #   image: registry.cn-hangzhou.aliyuncs.com/ivy-rong/meet-room:bbb
+  #   ports:
+  #     - 5173:5173
+  #   depends_on:
+  #     - nest-app
+  #   networks:
+  #     - meet_room_server_common-network
+  #   restart: always
   nest-app:
     build:
       context: ./
